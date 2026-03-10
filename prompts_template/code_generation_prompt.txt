@@ -10,28 +10,14 @@ Focus on:
 
 --------------------------------------------------
 
-CHANGE REQUEST
+Objective:
+To clean any given string.
 
-What needs to be changed:
-________________________________________
-________________________________________
-________________________________________
-
-
-Where the change should be applied:
-
-File / Module:
-________________________________________
-
-Function / Class / Section:
-________________________________________
-
+Task:
+To create new function which cleans special characters from given string and return cleaned string as an output.
 
 Additional instructions (optional):
-________________________________________
-________________________________________
-________________________________________
-
+Follow Python's best practices while generating code.
 
 OUTPUT
 
