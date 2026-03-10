@@ -1,0 +1,34 @@
+
+Bottlenecks:
+
+1. Slow webpage loading speed
+2. Increased memory usage due to heavy use of regular expressions
+3. Redundant code in the cleaning step
+
+Time complexity:
+
+The time complexity of the current implementation can be improved by reducing the number of iterations in the loop and optimizing the regular expression usage. The `perform_search` function contains a nested loop that iterates through all pages of search results, which results in a time complexity of O(n^2) for n pages. To improve this, we can optimize the pagination logic to only iterate through the necessary pages instead of iterating through all pages. Additionally, we can reduce the number of regular expression replacements by using more efficient methods such as lookahead and lookbehind assertions.
+
+Optimized approach:
+
+1. Optimize pagination logic:
+Instead of iterating through all pages, we can use a simple loop to iterate through the necessary pages based on the pagination limit. This will reduce the time complexity from O(n^2) to O(n).
+```python
+pagination_limit = 10 # number of pages to search
+for i in range(pagination_limit):
+    page = context.new_page()
+    page.goto("https://suit.cibil.com/", timeout=timeout_ms, wait_until="load")
+    logger.info("Page loaded.")
+```
+2. Optimize regular expression usage:
+We can reduce the number of regular expressions used by using lookahead and lookbehind assertions instead of multiple replacements. For example, we can use a single regular expression to remove unwanted words from the text data instead of using separate regular expressions for each word. This will improve the performance and reduce the memory usage.
+```python
+text_data = text_data.replace(r'\bsmt\b|smti\b|miss\b|individual\b|chairman\b|managing director\b|partner\b|prop(riet([oe]r)?)?\b|\(?ind\)?|\bin liquidation\b', '', regex=True)
+```
+3. Refactor redundant code:
+We can refactor the cleaning step to remove redundancy by creating a function that takes in the text data and removes unwanted words using a single regular expression. This will reduce the amount of code duplication and improve maintainability.
+```python
+def clean_text(text_data):
+    return text_data.replace(r'\bsmt\b|smti\b|miss\b|individual\b|chairman\b|managing director\b|partner\b|prop(riet([oe]r)?)?\b|\(?ind\)?|\bin liquidation\b', '', regex=True)
+```
+With these optimizations, the time complexity of the code can be reduced and the performance improved. Additionally, the code will become more maintainable and easier to read with fewer lines of code and reduced duplication.

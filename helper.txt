@@ -1,0 +1,12 @@
+Objective:
+Improve performance and reduce redundancy.
+
+Constraints:
+- Do not change business logic
+- Maintain functionality
+
+Instructions:
+1. Identify bottlenecks
+2. Explain time complexity
+3. Suggest optimized approach
+4. Suggest refactoring for redundancy

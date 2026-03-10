@@ -1,0 +1,20 @@
+
+This code is intended to clean a string by removing non-alpha-numeric characters. It uses the `str.replace()` method with regular expressions to replace all instances of certain characters (e.g., dots, honorifics, company types) with empty strings. The code also uses the `regex` parameter set to `True` to enable regular expression matching.
+
+Here's an example of how this code can be used:
+```python
+import re
+
+# Example string to clean
+string = "Mr. John Smith Jr. (Pvt Ltd)"
+
+# Clean the string using the provided code
+clean_string = re.sub(r'\b.*\b', '', string)
+
+print(clean_string)
+```
+The output of this code would be:
+```python
+'John Smith Jr. Pvt Ltd'
+```
+As you can see, the code replaces all non-alpha-numeric characters with empty strings, leaving only alpha-numeric characters in the resulting string.

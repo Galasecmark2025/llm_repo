@@ -1,0 +1,120 @@
+ To update the data storage logic using the pandas library and export the data to an Excel file, you can follow these steps. The provided code will be modified to remove the existing data insertion logic and replace it with pandas for data storage and Excel file export.
+
+Here's the updated version of the code:
+
+```python
+import pandas as pd
+from pathlib import Path
+import time
+from playwright.sync_api import sync_playwright
+
+# Assuming the rest of the code is defined elsewhere in the file
+
+def main():
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        
+        # ---- Navigate to site ----
+        MSE_URL = "http://example.com"  # Replace with actual URL
+        page.goto(MSE_URL, timeout=60000, wait_until="load")
+        
+        # Perform advance search and other actions
+        page.locator('//div[@class="m-filter-c clearfix"]//button[text()="Advance Search "]').click()
+        page.wait_for_load_state('networkidle')
+        page.wait_for_load_state('load')
+        time.sleep(2)
+        
+        # Fill in the date fields (assuming the selectors are correct)
+        page.evaluate(
+            """
+            ({ selector, value }) => {
+                const el = document.querySelector(selector);
+                el.value = value;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            """,
+            {
+                "selector": "#ExchangeCirculars_circularswithadvancesearch_dtFrom",
+                "value": "2023-01-01"  # Replace with actual date
+            }
+        )
+        page.evaluate(
+            """
+            ({ selector, value }) => {
+                const el = document.querySelector(selector);
+                el.value = value;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            """,
+            {
+                "selector": "#ExchangeCirculars_circularswithadvancesearch_dtTo",
+                "value": "2023-12-31"  # Replace with actual date
+            }
+        )
+        
+        # Extract data
+        page.locator('//table[@class="table table-striped t-listview"]//tr[@class]').evaluate_all(
+            """
+            (rows) => {
+                const data = [];
+                for (let row of rows) {
+                    const tds = row.querySelectorAll("td");
+                    const date_raw = tds[0].innerText.trim();
+                    const date = new Date(date_raw).toISOString().split('T')[0];  # Convert to ISO format
+                    const circular_no = tds[1].innerText.trim();
+                    const segment = tds[2].innerText.trim();
+                    const department = tds[3].innerText.trim();
+                    const anchor = tds[4].querySelector("a");
+                    const subject = anchor ? anchor.innerText.trim() : "";
+                    const circular_link = anchor ? anchor.href : "";
+                    data.push({ date, circular_no, segment, department, subject, circular_link });
+                }
+                return data;
+            }
+            """
+        )
+        
+        # Convert data to DataFrame
+        data = page.locator('//table[@class="table table-striped t-listview"]//tr[@class]').evaluate_all(
+            """
+            (rows) => {
+                const data = [];
+                for (let row of rows) {
+                    const tds = row.querySelectorAll("td");
+                    const date_raw = tds[0].innerText.trim();
+                    const date = new Date(date_raw).toISOString().split('T')[0];  # Convert to ISO format
+                    const circular_no = tds[1].innerText.trim();
+                    const segment = tds[2].innerText.trim();
+                    const department = tds[3].innerText.trim();
+                    const anchor = tds[4].querySelector("a");
+                    const subject = anchor ? anchor.innerText.trim() : "";
+                    const circular_link = anchor ? anchor.href : "";
+                    data.push({ date, circular_no, segment, department, subject, circular_link });
+                }
+                return data;
+            }
+            """
+        )
+        
+        df = pd.DataFrame(data)
+        
+        # Export to Excel
+        output_dir = Path("output")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        excel_path = output_dir / "circulars.xlsx"
+        df.to_excel(excel_path, index=False)
+
+if __name__ == "__main__":
+    main()
+```
+
+This code will:
+1. Use Playwright to navigate to the MSE site and perform the advance search.
+2. Extract the data from the table rows.
+3. Convert the extracted data into a pandas DataFrame.
+4. Export the DataFrame to an Excel file.
+
+Make sure to replace the placeholder values and selectors with the actual ones used in your application.

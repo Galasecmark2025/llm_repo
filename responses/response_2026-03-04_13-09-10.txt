@@ -1,0 +1,63 @@
+ To create a Python script that scrapes the website "https://cbic-gst.gov.in/hindi/circulars.html", we can use the `requests` library to fetch the HTML content of the page and the `BeautifulSoup` library from `bs4` to parse the HTML. Since Playwright is not necessary for this task, we will stick with standard libraries like `requests` and `BeautifulSoup`.
+
+Here's a Python script that scrapes the website:
+
+```python
+import requests
+from bs4 import BeautifulSoup
+import re
+
+def fetch_html(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        raise Exception(f"Failed to fetch the page {url}")
+
+def parse_html(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    # You can add more parsing logic here if needed
+    return soup
+
+def extract_pdf_links(soup):
+    pdf_links = []
+    for link in soup.find_all('a', href=re.compile(r'\.pdf$')):
+        pdf_link = urljoin(BASE_URL, link['href'])
+        pdf_links.append(pdf_link)
+    return pdf_links
+
+def download_pdfs(pdf_links):
+    for link in pdf_links:
+        response = requests.get(link)
+        if response.status_code == 200:
+            # Extract the filename from the URL
+            file_name = re.search(r'/([^/]+)\.pdf$', link).group(1)
+            with open(file_name, 'wb') as f:
+                f.write(response.content)
+        else:
+            print(f"Failed to download PDF from {link}")
+
+BASE_URL = "https://cbic-gst.gov.in/hindi/circulars.html"
+
+if __name__ == "__main__":
+    try:
+        html_content = fetch_html(BASE_URL)
+        soup = parse_html(html_content)
+        pdf_links = extract_pdf_links(soup)
+        download_pdfs(pdf_links)
+        print("PDFs downloaded successfully.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+```
+
+### Explanation:
+1. **Fetching HTML Content**: The `fetch_html` function uses the `requests` library to fetch the HTML content of the webpage.
+2. **Parsing HTML**: The `parse_html` function uses `BeautifulSoup` to parse the HTML content. You can add more parsing logic here if needed, depending on the structure of the website.
+3. **Extracting PDF Links**: The `extract_pdf_links` function finds all links that end with `.pdf`. It constructs the full URL for each link using `urljoin`.
+4. **Downloading PDFs**: The `download_pdfs` function downloads each PDF and saves it to the local file system. It extracts the filename from the URL to name the downloaded files.
+5. **Main Function**: The main function fetches, parses, extracts links, and downloads the PDFs. It also handles exceptions for any errors that might occur during the process.
+
+### Notes:
+- Ensure you have the `requests` and `BeautifulSoup` libraries installed (`pip install requests beautifulsoup4`).
+- Adjust the parsing logic in `parse_html` if the structure of the website changes.
+- The script assumes that the PDF links are directly accessible from the main page without following additional pages or authentication. If there are multiple pages or complex navigation, you might need to extend the script to handle pagination and possibly login mechanisms.

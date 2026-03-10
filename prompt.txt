@@ -1,0 +1,13 @@
+Modify the given code to update the data storage logic.
+
+Requirements:
+1. Remove the existing logic that inserts or stores data using insert_new_record.
+2. Instead of using Frappe, use the pandas library to collect the data into a DataFrame.
+3. After constructing the DataFrame, export the data to an Excel file (.xlsx).
+4. Ensure the Excel file is properly formatted with column headers.
+5. Maintain the existing data extraction and processing logic unless changes are required for compatibility.
+6. Ensure the code is clean, readable, and follows Python best practices.
+7. Handle possible edge cases such as empty data, missing fields, or file writing errors.
+
+Output:
+Provide the complete updated version of the code where data insertion is completely removed.

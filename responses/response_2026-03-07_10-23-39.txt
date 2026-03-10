@@ -1,0 +1,90 @@
+ To update the data storage logic as per the requirements, we will use the pandas library to collect the data into a DataFrame and then export it to an Excel file. Below is the updated version of the code:
+
+```python
+import pandas as pd
+import os
+from pathlib import Path
+
+# Assuming the rest of the code is correctly defined and imports are available
+
+def excel_save_n_check(date, circular_no, exchange, base_dir, operation='check', logger=None):
+    # Existing logic for checking if the record is present
+    pass
+
+def clean_string(string, logger=None):
+    # Existing logic for cleaning strings
+    pass
+
+def convert_date(date_input, date_format, logger=None):
+    # Existing logic for converting dates
+    pass
+
+def download_pdf_via_requests(pdf_url, circular_no, save_dir, headers, logger=None):
+    # Existing logic for downloading PDF
+    pass
+
+def download_n_extract_zip_via_requests(zip_url, circular_no, output_dir, headers, logger=None):
+    # Existing logic for downloading and extracting ZIP
+    pass
+
+def insert_new_record(subject, circular_url, date, circular_no, regulator, department, segment_name, parent_path, logger=None):
+    # Existing logic for inserting new record
+    pass
+
+# Updated code starts here
+
+def scrape_mse(url, from_date, exchange, department, segment, logger):
+    output_dir = Path("output_dir")  # Define the output directory
+    # The rest of the code remains unchanged
+
+    try:
+        # Navigate to the site and perform the necessary actions
+        # The rest of the code remains unchanged
+
+        # Collect data into a DataFrame
+        data = []
+        cir_rows = page.locator('//table[@class="table table-striped t-listview"]//tr[@class]')
+        rows_count = cir_rows.count()
+        for i in range(rows_count):
+            row = cir_rows.nth(i)
+            tds = row.locator("td")
+            date_raw = tds.nth(0).inner_text().strip()
+            date = convert_date(date_input=date_raw, date_format="%d-%b-%Y", logger=logger)
+            circular_no = tds.nth(1).inner_text().strip()
+            segment = tds.nth(2).inner_text().strip()
+            department = tds.nth(3).inner_text().strip()
+            anchor = tds.nth(4).locator('a')
+            subject = anchor.inner_text().strip()
+            circular_link = anchor.get_attribute('href')
+            if circular_link:
+                circular_link = urljoin(MSE_URL, circular_link)
+            circular_no_cleaned = clean_string(string=circular_no, logger=logger)
+            save_dir = output_dir / str(circular_no_cleaned)
+            save_dir.mkdir(parents=True, exist_ok=True)
+
+            data.append({
+                'Date': date,
+                'Circular No': circular_no,
+                'Segment': segment,
+                'Department': department,
+                'Subject': subject,
+                'Circular URL': circular_link
+            })
+
+        # Create a DataFrame from the collected data
+        df = pd.DataFrame(data)
+
+        # Export the DataFrame to an Excel file
+        excel_file_path = output_dir / f"{exchange}_circulars.xlsx"
+        df.to_excel(excel_file_path, index=False)
+        logger.info(f'Successfully exported data to {excel_file_path}')
+
+        return True
+
+    except Exception as err:
+        err_msg = f'Error occurred while scraping {exchange}'
+        logger.error(f'{err_msg}: {err}')
+        return False
+```
+
+This updated code removes the existing data insertion logic and instead collects the data into a pandas DataFrame, which is then exported to an Excel file. The DataFrame includes columns for Date, Circular No, Segment, Department, Subject, and Circular URL. The Excel file is saved in the specified output directory with a filename based on the exchange name.

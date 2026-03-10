@@ -1,0 +1,78 @@
+ To improve the provided code and reduce redundancy while adhering to Python best practices, we can make several changes. The main areas for improvement include reducing duplicate code, improving readability, and optimizing performance. Here are some suggestions:
+
+1. **Extract Repeated Code into Functions**: We can create a function to handle the common actions such as navigating to the URL, clicking on the advance search button, and setting the date input field. This will reduce redundancy and make the code more maintainable.
+
+2. **Use Explicit Imports**: Ensure that all necessary modules are explicitly imported at the beginning of the script.
+
+3. **Optimize Timeouts and Sleep**: Instead of using `time.sleep(2)` or `page.wait_for_timeout(7000)`, which block the execution, we can use more efficient waiting mechanisms provided by Playwright.
+
+4. **Consolidate Date Filter Handling**: If possible, consolidate the date filter handling logic across both scrapers to avoid redundancy.
+
+Here's how you might refactor the code:
+
+```python
+# circular_automation/scrapers/mse_scraper.py
+from playwright.sync_api import sync_playwright
+import time
+
+def navigate_and_set_date(page, url, from_date):
+    MSE_URL = url
+    try:
+        page.goto(MSE_URL, timeout=60000, wait_until="load")
+        
+        # Click on Advance Search button
+        page.locator('//div[@class="m-filter-c clearfix"]//button[text()="Advance Search "]').click()
+        page.wait_for_load_state('networkidle')
+        
+        # Set the date input field
+        page.evaluate(
+            """
+            ({ selector, value }) => {
+                const el = document.querySelector(selector);
+                el.value = value;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            """,
+            {
+                "selector": "#ExchangeCirculars_circularswithadvancesearch_dtFrom",
+                "value": f"{from_date.replace('/', '-')}"
+            }
+        )
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Main execution block
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    navigate_and_set_date(page, MSE_URL, from_date)
+    browser.close()
+```
+
+For the `kra_scraper.py`, you can follow a similar pattern:
+
+```python
+# circular_automation/scrapers/kra_scraper.py
+from playwright.sync_api import sync_playwright
+import time
+
+def navigate_and_set_date(page, config, from_date, to_date):
+    if config.get("requires_date") and from_date and to_date:
+        try:
+            script = config["date_input_script"].format(from_date=from_date, to_date=to_date)
+            iframe.evaluate(script)
+            logger.info(f"Executing KRA date input script for {from_date} to {to_date}")
+            iframe.wait_for_load_state("networkidle", timeout=30000)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+# Main execution block
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    navigate_and_set_date(page, config, from_date, to_date)
+    browser.close()
+```
+
+These changes will make the code more efficient and easier to maintain by reducing redundancy and improving readability.

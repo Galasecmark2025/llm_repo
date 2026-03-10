@@ -1,0 +1,12 @@
+Based on the given code, here are some suggestions to improve performance and reduce redundancy:
+
+1. Bottleneck 1: The `perform_search` function in `AutoScraper.py` is a synchronous function that takes too long to complete. This is because it has multiple for loops that iterate over the pagination of search results, which can be time-consuming.
+2. Time complexity: The time complexity of this function is O(n^2), where n is the number of pages in the pagination. This is due to the nested loops that are used to iterate over each page's contents and search for specific keywords.
+3. Suggested optimized approach: To improve performance, you can use asynchronous programming techniques to fetch all the pages at once using `asyncio` or `threading`. You can also use the `requests-html` library to parse HTML content more efficiently than BeautifulSoup.
+4. Refactoring for redundancy: The `cleaner` and `helper` functions in `utilities` are similar but have some differences in their regular expressions. You can merge these two functions into one by using optional capture groups to match the different variations of unwanted words and suffixes. This will reduce code duplication and improve readability.
+5. Other suggestions:
+
+a. Use a faster web driver like ChromeDriver or PhantomJS instead of Playwright. These drivers are optimized for performance and can execute scripts faster than Playwright.
+b. Consider using the `concurrent.futures` module to run multiple threads in parallel, which can further improve performance.
+c. Use a caching mechanism like Redis or Memcached to store frequently accessed data, such as search results, to reduce the number of requests made to the CIBIL website.
+d. Consider using a more efficient algorithm for pagination, like Binary Search or Hashing, to reduce the time complexity from O(n^2) to O(log n).

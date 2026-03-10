@@ -1,0 +1,63 @@
+ The provided code snippet is repeated multiple times, which indicates redundancy. To reduce redundancy and improve the code, we can refactor the code to avoid repetition. Here's a refactored version of the code:
+
+```python
+# ---- Navigate to site ----
+MSE_URL = url
+try:
+    page.goto(MSE_URL, timeout=60000, wait_until="load")
+    
+    page.locator('//div[@class="m-filter-c clearfix"]//button[text()="Advance Search "]').click()
+    page.wait_for_load_state('networkidle')
+    page.wait_for_load_state('load')
+    time.sleep(2)
+    
+    def set_input_value(selector, value):
+        el = document.querySelector(selector)
+        el.value = value
+        el.dispatchEvent(new Event('input', { bubbles: true }))
+        el.dispatchEvent(new Event('change', { bubbles: true }))
+
+    page.evaluate(set_input_value, selector="#ExchangeCirculars_circularswithadvancesearch_dtFrom", value=f"{from_date.replace('/', '-')}")
+```
+
+### Changes Made:
+1. **Extracted the `page.evaluate` call into a function**: This reduces redundancy and makes the code cleaner. The function `set_input_value` encapsulates the logic for setting the input value and dispatching events.
+2. **Used a function for the `page.evaluate` call**: This makes the code more modular and easier to read.
+
+### Additional Improvements:
+- **Error Handling**: Consider adding error handling to manage potential issues with the URL or other network-related errors.
+- **Logging**: Add logging to track the progress and any issues during the scraping process.
+- **Performance**: If the `time.sleep(2)` is necessary, consider making it configurable or adjust the wait conditions to be more precise.
+
+### Example with Logging and Error Handling:
+```python
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# ---- Navigate to site ----
+MSE_URL = url
+try:
+    page.goto(MSE_URL, timeout=60000, wait_until="load")
+    logging.info(f"Navigated to {MSE_URL}")
+    
+    page.locator('//div[@class="m-filter-c clearfix"]//button[text()="Advance Search "]').click()
+    page.wait_for_load_state('networkidle')
+    page.wait_for_load_state('load')
+    logging.info("Clicked 'Advance Search' and waited for load state")
+    
+    def set_input_value(selector, value):
+        el = document.querySelector(selector)
+        el.value = value
+        el.dispatchEvent(new Event('input', { bubbles: true }))
+        el.dispatchEvent(new Event('change', { bubbles: true }))
+
+    page.evaluate(set_input_value, selector="#ExchangeCirculars_circularswithadvancesearch_dtFrom", value=f"{from_date.replace('/', '-')}")
+    logging.info("Set input value and dispatched events")
+
+except Exception as e:
+    logging.error(f"An error occurred: {e}")
+```
+
+This refactored code is more efficient and adheres to Python best practices by reducing redundancy and improving modularity.

@@ -1,0 +1,47 @@
+ Certainly! Below is the updated version of the code where Frappe insertion is replaced with pandas DataFrame creation and Excel file generation.
+
+```python
+import pandas as pd
+
+# Assuming this is the existing code to extract and process data
+# Example data extraction and processing logic
+def extract_data():
+    # Placeholder for the actual data extraction logic
+    # This could be fetching data from a database, API, or other data source
+    data = {
+        'Name': ['Alice', 'Bob', 'Charlie'],
+        'Age': [25, 30, 35],
+        'City': ['New York', 'Los Angeles', 'Chicago']
+    }
+    return pd.DataFrame(data)
+
+# Function to create a DataFrame and export to Excel
+def create_and_export_excel():
+    try:
+        # Extract data
+        df = extract_data()
+
+        # Check if the DataFrame is empty
+        if df.empty:
+            print("No data to export.")
+            return
+
+        # Export DataFrame to Excel
+        excel_file_path = 'output.xlsx'
+        df.to_excel(excel_file_path, index=False, header=True)
+        print(f"Data exported to {excel_file_path}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Call the function to create and export the Excel file
+create_and_export_excel()
+```
+
+### Explanation:
+1. **Data Extraction**: The `extract_data` function is a placeholder for the actual data extraction logic. In this example, it creates a DataFrame with sample data.
+2. **DataFrame Creation**: The `create_and_export_excel` function extracts data using `extract_data` and checks if the DataFrame is empty.
+3. **Excel Export**: If the DataFrame is not empty, it exports the DataFrame to an Excel file (`output.xlsx`) with column headers.
+4. **Error Handling**: The code includes a try-except block to handle any potential errors, such as file writing errors.
+
+This code follows Python best practices and ensures that the data is stored in a clean and readable format using pandas and exported to an Excel file.

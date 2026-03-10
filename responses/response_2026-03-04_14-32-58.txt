@@ -1,0 +1,80 @@
+ To improve the provided code, we can focus on reducing redundancy and improving efficiency. Here are some suggestions for refactoring and optimizing the code in both `mse_scraper.py` and `kra_scraper.py`:
+
+### For `mse_scraper.py`
+1. **Remove Redundant Code**: The repeated navigation, button click, and wait operations can be consolidated into a function.
+2. **Use Explicit Waits**: Instead of relying on `time.sleep`, use explicit waits to ensure the page is fully loaded before proceeding.
+3. **Consolidate Locators**: Consolidate locator strings for better readability and maintenance.
+
+Here's an example refactored version:
+
+```python
+import time
+from playwright.sync_api import sync_playwright
+
+def navigate_and_input_date(page, url, from_date):
+    MSE_URL = url
+    try:
+        page.goto(MSE_URL, timeout=60000, wait_until="load")
+        page.locator('//div[@class="m-filter-c clearfix"]//button[text()="Advance Search "]').click()
+        page.wait_for_load_state('networkidle')
+        page.wait_for_load_state('load')
+        
+        # Input date into the specified element
+        selector = "#ExchangeCirculars_circularswithadvancesearch_dtFrom"
+        value = from_date.replace('/', '-')
+        page.evaluate(
+            """
+            ({ selector, value }) => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    el.value = value;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            }
+            """,
+            {"selector": selector, "value": value}
+        )
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Usage example
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    navigate_and_input_date(page, "http://example.com", "2023/10/01")
+    browser.close()
+```
+
+### For `kra_scraper.py`
+1. **Consolidate Date Filtering**: Similar to the refactoring in `mse_scraper.py`, consolidate date filtering logic into a function.
+2. **Use Configuration for Scripts**: Use configuration settings or parameters for scripts to avoid redundancy and make the code more flexible.
+
+Here's an example refactored version:
+
+```python
+import time
+from playwright.sync_api import sync_playwright
+
+def configure_date_filter(iframe, config, from_date=None, to_date=None):
+    if config.get("requires_date") and from_date and to_date:
+        script = config["date_input_script"].format(from_date=from_date, to_date=to_date)
+        iframe.evaluate(script)
+        logger.info(f"Executing KRA date input script for {from_date} to {to_date}")
+        iframe.wait_for_load_state("networkidle", timeout=30000)
+        time.sleep(7)  # Adjusted sleep time based on expected load times
+
+# Usage example
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+    configure_date_filter(page.frame("main-iframe"), config, "2023/10/01", "2023/10/31")
+    browser.close()
+```
+
+### General Tips:
+- **Use Playwright's Built-in Waits**: Instead of `time.sleep` and multiple `wait_for_load_state`, leverage Playwright's built-in waiting mechanisms for better performance and reliability.
+- **Consolidate Locators**: Use meaningful variable names or consolidate locator strings to avoid redundancy and improve readability.
+- **Error Handling**: Implement robust error handling to catch and manage exceptions gracefully, especially when dealing with network operations and page interactions.
+
+By applying these refactoring techniques, you can significantly reduce code redundancy and enhance the efficiency of your scraping scripts.

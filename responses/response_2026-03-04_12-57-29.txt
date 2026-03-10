@@ -1,0 +1,47 @@
+ To create a Python function that removes all non-alphanumeric characters from a string while maintaining the existing functionality and best practices, we can simplify and consolidate the code. Here's a new implementation of `clean_string` that adheres to these principles:
+
+```python
+import re
+
+def clean_string(string=None, separator='_', max_len=None):
+    """
+    Cleans a string by removing all non-alphanumeric characters and replacing them with the specified separator.
+    
+    Args:
+        string (str): The input string to be cleaned.
+        separator (str): The character to replace non-alphanumeric characters with. Default is '_'.
+        max_len (int, optional): Maximum length of the resulting string. If provided, it will truncate the string if necessary.
+    
+    Returns:
+        str: A cleaned version of the input string.
+    """
+    try:
+        # Strip leading and trailing whitespace and replace non-alphanumeric characters with the separator
+        clean_string = re.sub(r'[^A-Za-z0-9]', separator, str(string).strip())
+        
+        # Replace multiple separators with a single one
+        clean_string = re.sub(rf'{re.escape(separator)}+', separator, clean_string)
+        
+        # Strip leading and trailing separator if present
+        clean_string = clean_string.strip(separator)
+        
+        # Truncate to the maximum length if specified
+        if max_len is not None and len(clean_string) > max_len:
+            clean_string = clean_string[:max_len]
+        
+        return clean_string
+    
+    except Exception as err:
+        print(f'Error occurred while cleaning string: {err}')
+        return None
+```
+
+### Explanation:
+1. **String Conversion and Stripping**: The input string is converted to a string using `str()` and stripped of leading and trailing whitespace with `.strip()`.
+2. **Regex Substitution**: Non-alphanumeric characters are replaced with the specified separator using `re.sub(r'[^A-Za-z0-9]', separator, str(string).strip())`.
+3. **Multiple Separators Handling**: Multiple consecutive separators are reduced to a single one using `re.sub(rf'{re.escape(separator)}+', separator, clean_string)`.
+4. **Final Stripping**: Leading and trailing separators are removed with `.strip(separator)`.
+5. **Length Limitation**: If `max_len` is provided, the string is truncated to this length if it exceeds it.
+6. **Error Handling**: Any exceptions during processing are caught, logged (or printed in this case), and return `None`.
+
+This implementation ensures that the function remains efficient and adheres to Python best practices by handling errors gracefully and using built-in functions for string manipulation.

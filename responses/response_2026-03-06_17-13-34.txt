@@ -1,0 +1,80 @@
+ Certainly! Below is an improved version of the file `mse_scraper.py` following the outlined requirements:
+
+```python
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+class MSEScraper:
+    def __init__(self, url):
+        self.url = url
+
+    def fetch_data(self):
+        """
+        Fetch data from the given URL using an HTTP GET request.
+        """
+        try:
+            response = requests.get(self.url)
+            response.raise_for_status()  # Raise an error for bad status codes
+            return response.text
+        except requests.RequestException as e:
+            print(f"Error fetching data: {e}")
+            return None
+
+    def parse_data(self, html):
+        """
+        Parse the HTML content using BeautifulSoup to extract relevant data.
+        """
+        if not html:
+            return []
+
+        soup = BeautifulSoup(html, 'html.parser')
+        table = soup.find('table')  # Assuming the data is in a table
+        if not table:
+            return []
+
+        rows = table.find_all('tr')
+        data = []
+        for row in rows:
+            cols = row.find_all('td')
+            if cols:
+                cols = [ele.text.strip() for ele in cols]
+                data.append(cols)
+        return data
+
+    def save_to_csv(self, data, filename):
+        """
+        Save the extracted data to a CSV file.
+        """
+        with open(filename, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerows(data)
+
+    def run(self):
+        """
+        Main function to run the scraper.
+        """
+        html_content = self.fetch_data()
+        parsed_data = self.parse_data(html_content)
+        self.save_to_csv(parsed_data, 'output.csv')
+
+if __name__ == "__main__":
+    scraper = MSEScraper('http://example.com')  # Replace with the actual URL
+    scraper.run()
+```
+
+### Explanation:
+1. **Class Definition**: The `MSEScraper` class encapsulates the scraping logic.
+2. **Fetching Data**: The `fetch_data` method uses `requests` to fetch the HTML content from the provided URL.
+3. **Parsing Data**: The `parse_data` method uses BeautifulSoup to parse the HTML and extract data from the table.
+4. **Saving Data**: The `save_to_csv` method saves the extracted data to a CSV file.
+5. **Main Function**: The `run` method orchestrates the fetching, parsing, and saving of data.
+6. **Error Handling**: The `fetch_data` method includes error handling to manage network-related issues.
+
+### Benefits:
+- **Modularity**: The code is modular, with each function performing a specific task.
+- **Readability**: The use of classes and methods enhances readability and maintainability.
+- **Efficiency**: The code avoids redundant operations and is efficient in handling data extraction and storage.
+- **Error Handling**: Proper error handling ensures that the program can gracefully handle issues during data fetching and parsing.
+
+This implementation follows Python best practices and ensures that the code is clean, efficient, and easy to maintain.

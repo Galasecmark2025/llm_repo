@@ -1,0 +1,15 @@
+{
+    "folder_path": "circular_automation", 
+    "folder_path_dinesh": "BICONTROLS/BICONTROLS/BIControls/Class", 
+    "language": "python",
+    "prompt_ref": "prompt.txt",
+    "extension": "py",
+    "llm": "deepseek-coder-v2:16b", 
+    "text_embed_model": "nomic-embed-text", 
+    "chunk_size": 1200, 
+    "chunk_overlap": 200,
+    "tokens": 2000,
+    "temperature": 0.1, 
+    "top_k": 5, 
+    "fetch_top_k": 60
+}

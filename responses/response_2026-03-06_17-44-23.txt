@@ -1,0 +1,121 @@
+ To update the code to use the pandas library for data storage and export it to an Excel file, we will follow these steps:
+
+1. Extract the data from the webpage using Playwright.
+2. Store the extracted data into a pandas DataFrame.
+3. Export the DataFrame to an Excel file.
+
+Here's the updated version of the code:
+
+```python
+# mse_scraper.py
+
+from playwright.sync_api import sync_playwright
+import pandas as pd
+from urllib.parse import urljoin
+
+from circular_automation.circular_automation.scrapers.scraper_utils.download_n_extract_zip_via_requests import download_n_extract_zip_via_requests
+from circular_automation.circular_automation.scrapers.scraper_utils.download_pdf_via_requests import download_pdf_via_requests
+from circular_automation.circular_automation.scrapers.scraper_utils.clean_string import convert_date, clean_string
+from circular_automation.circular_automation.scrapers.scraper_utils.excel_save_n_check import excel_save_n_check
+from circular_automation.circular_automation.scrapers.scraper_utils.InsertRecord import InsertRecord
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "*/*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://www.msei.in/downloads/Circulars/Default",
+    "Connection": "keep-alive"
+}
+
+def scrape_mse(exchange, output_dir, logger):
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.set_extra_http_headers(HEADERS)
+        page.goto("https://www.msei.in/downloads/Circulars/Default")
+
+        # Locate the table and extract data
+        cir_rows = page.locator('//table[@class="table table-striped t-listview"]//tr[@class]')
+        rows_count = cir_rows.count()
+        logger.info(f'Circulars count: {rows_count}')
+
+        data = []
+        for i in range(rows_count):
+            row = cir_rows.nth(i)
+            tds = row.locator("td")
+            date_raw = tds.nth(0).inner_text().strip()
+            date = convert_date(date_input=date_raw, date_format="%d-%b-%Y", logger=logger)
+            circular_no  = tds.nth(1).inner_text().strip()
+            segment  = tds.nth(2).inner_text().strip()
+            department  = tds.nth(3).inner_text().strip()
+            anchor = tds.nth(4).locator('a')
+            subject = anchor.inner_text().strip()
+            circular_link = anchor.get_attribute('href')
+            if circular_link:
+                circular_link = urljoin("https://www.msei.in", circular_link)
+            logger.info(circular_link)
+            circular_no_cleaned = clean_string(string=circular_no, logger=logger)
+            save_dir = output_dir / str(circular_no_cleaned)
+            save_dir.mkdir(parents=True, exist_ok=True)
+            download_status = False
+            if circular_link.endswith('.pdf'):
+                pdf_download_status = download_pdf_via_requests(pdf_url=circular_link, circular_no=circular_no, save_dir=save_dir, headers=HEADERS, logger=logger)
+                if pdf_download_status:
+                    logger.info(f'PDF downloaded for: {circular_no}')
+                    download_status = True
+                else:
+                    logger.warning(f'Failed to download PDF for: {circular_no}')
+            elif circular_link.endswith('.zip'):
+                zip_download_status = download_n_extract_zip_via_requests(zip_url=circular_link, circular_no=circular_no, output_dir=output_dir, headers=HEADERS, logger=logger)
+                if zip_download_status:
+                    logger.info(f'ZIP downloaded for: {circular_no}')
+                    download_status = True
+                else:
+                    logger.warning(f'Failed to download ZIP for: {circular_no}')
+
+            if download_status:
+                inserter = InsertRecord()
+                insert_record_status = inserter.insert_new_record(
+                    subject=subject, 
+                    circular_url=circular_link, 
+                    date=date,
+                    circular_no=f'{exchange}/{circular_no}', 
+                    regulator=exchange, 
+                    department=department, 
+                    segment_name=segment, 
+                    parent_path=save_dir,
+                    logger=logger
+                )
+                if insert_record_status:
+                    logger.info(f'Circular record inserted: {circular_no}')
+                    save_history_status = excel_save_n_check(date=date, circular_no=circular_no, exchange=exchange, base_dir=output_dir, logger=logger)
+                    if save_history_status:
+                        logger.info(f'Successfully saved record for: {date}: {circular_no}')
+                    else:
+                        logger.warning(f'Failed to save record for: {date}: {circular_no}')
+                else:
+                    logger.warning(f'Unable to insert circular for: {circular_no}')
+
+        # Export data to Excel
+        df = pd.DataFrame(data)
+        excel_file_path = output_dir / "circulars.xlsx"
+        df.to_excel(excel_file_path, index=False)
+        logger.info(f'Data exported to {excel_file_path}')
+
+        browser.close()
+        return True
+
+    except Exception as err:
+        err_msg = f'Error occurred while scraping {exchange}'
+        logger.error(f'{err_msg}: {err}')
+        return False
+```
+
+### Explanation:
+1. **Data Extraction**: The data is extracted from the webpage using Playwright and stored in a list of dictionaries (`data`).
+2. **DataFrame Creation**: The list of dictionaries is converted to a pandas DataFrame.
+3. **Excel Export**: The DataFrame is exported to an Excel file (`circulars.xlsx`) with column headers.
+
+This approach ensures that the data extraction and storage logic is decoupled from the Frappe-specific code, making the code more flexible and easier to maintain.

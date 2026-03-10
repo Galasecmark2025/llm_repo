@@ -1,0 +1,32 @@
+ Sure, I can help you update the logic to use pandas to create a DataFrame and then store it as an Excel file instead of inserting data into Frappe. Below is an example of how you can achieve this:
+
+```python
+import pandas as pd
+
+# Assuming you have some data to insert into Frappe
+# For demonstration, let's create a sample DataFrame
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie'],
+    'Age': [25, 30, 35],
+    'City': ['New York', 'Los Angeles', 'Chicago']
+}
+
+# Create a DataFrame from the data
+df = pd.DataFrame(data)
+
+# Save the DataFrame to an Excel file
+excel_file_path = 'output.xlsx'
+df.to_excel(excel_file_path, index=False)
+
+# Print a message indicating the file has been saved
+print(f"Data has been saved to {excel_file_path}")
+```
+
+In this code:
+1. We import the `pandas` library.
+2. We create a sample DataFrame `df` from a dictionary `data`.
+3. We save the DataFrame to an Excel file using the `to_excel` method.
+4. We specify the file path where the Excel file will be saved.
+5. We print a message indicating that the data has been saved.
+
+You can replace the sample data and the file path with your actual data and desired location for the Excel file.

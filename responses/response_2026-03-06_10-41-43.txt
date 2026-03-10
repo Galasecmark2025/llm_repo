@@ -1,0 +1,19 @@
+ - Filename: `nse_scraper.py`
+  - What it does: This file contains code for skipping circular entries that are already present and logging details about the subject, department, category, and file URL of each circular.
+
+- Filename: `nse_selenium_scrapper_backup.py`
+  - What it does: This file contains code for extracting data from web pages using Selenium, including reading more content by clicking "read more" buttons and extracting specific data from the page.
+
+- Filename: `kra_scraper.py`
+  - What it does: This file contains code for checking if a downloaded file is a PDF or ZIP and logging warnings if it is not. It also handles the extraction and saving of the file content.
+
+- Filename: `mse_scraper.py`
+  - What it does: This file contains code for navigating to a specific URL and performing actions such as clicking on an "Advance Search" button and filling out date fields using Playwright.
+
+- Filename: `scraper_utils\clean_string.py`
+  - What it does: This file contains utility functions for cleaning filenames by removing special characters and ensuring the filename is within a specified length. It also handles date conversion and logging errors.
+
+- Filename: `nse_selenium_scrapper_backup.py`
+  - What it does: This file contains code for extracting data from web pages using Selenium, including reading more content by clicking "read more" buttons and extracting specific data from the page.
+
+Each file serves a specific purpose in the project, handling different aspects of data extraction and processing from various websites.

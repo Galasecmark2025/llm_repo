@@ -1,0 +1,22 @@
+
+Bottleneck: The current implementation of the `change_status` method is slow because it performs multiple database queries and uses nested loops. This can lead to performance issues when dealing with large datasets.
+
+Time complexity: The current implementation has a time complexity of O(n^2), where n is the number of circulars, as each circular has multiple fields that need to be updated individually.
+
+Optimized approach: To improve performance and reduce redundancy, we can refactor the `change_status` method to use a single database query to update all the relevant fields for each circular. This will significantly reduce the time complexity of the method and improve its overall efficiency.
+
+Refactoring for redundancy: We can also identify redundant code in the current implementation and simplify it. For example, we can eliminate the need for multiple `if` statements by using a single `switch` statement to handle all possible status updates. Additionally, we can reduce the number of database queries by combining them into a single query that updates multiple fields at once.
+
+Here's an example of how the refactored method could look like:
+```python
+def change_status(circular_no, new_status):
+    # Use a single database query to update all relevant fields for each circular
+    frappe.db.sql("""
+        UPDATE `tabCircular`
+        SET status = %s, status_date = %s, updated_by = %s
+        WHERE name IN (%s) AND status != %s
+        """, [new_status, get_today(), frappe.session.user, circular_no, new_status])
+    # Commit the changes to the database
+    frappe.db.commit()
+```
+By using a single database query and eliminating redundant code, we can significantly improve the performance of the `change_status` method while maintaining its functionality.
